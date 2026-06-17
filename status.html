@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الاستعلام عن طلب التطوع</title>
+
+<style>
+body{
+    font-family:Cairo, Arial, sans-serif;
+    background:#f7f3ee;
+    direction:rtl;
+    padding:30px;
+}
+
+.box{
+    max-width:550px;
+    margin:100px auto;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.1);
+    text-align:center;
+}
+
+h2{
+    color:#871919;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-sizing:border-box;
+}
+
+button{
+    background:#871919;
+    color:white;
+    border:none;
+    padding:12px 35px;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+    margin:5px;
+}
+
+.back-btn{
+    background:#777;
+}
+
+.result{
+    margin-top:25px;
+    font-size:18px;
+    font-weight:bold;
+    text-align:right;
+    line-height:2;
+}
+
+.info-card{
+    background:#f7f3ee;
+    padding:15px;
+    border-radius:12px;
+    border-right:5px solid #871919;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>الاستعلام عن طلب التطوع</h2>
+
+    <input type="text" id="nationalId" placeholder="أدخل رقم الهوية">
+
+    <button onclick="checkStatus()">استعلام</button>
+
+    <button class="back-btn" onclick="window.location.href='index.html'">
+        الرجوع للرئيسية
+    </button>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+function checkStatus(){
+    const nationalId = document.getElementById("nationalId").value.trim();
+    const result = document.getElementById("result");
+
+    if(nationalId === ""){
+        result.style.color = "red";
+        result.innerHTML = "يرجى إدخال رقم الهوية";
+        return;
+    }
+
+    fetch("/check-status/" + nationalId)
+    .then(res => res.json())
+    .then(data => {
+        if(!data.found){
+            result.style.color = "red";
+            result.innerHTML = "لا يوجد طلب مسجل بهذا الرقم";
+            return;
+        }
+
+        let statusText = "";
+
+        if(data.status === "accepted"){
+            statusText = "مقبول";
+        }
+        else if(data.status === "rejected"){
+            statusText = "مرفوض";
+        }
+        else{
+            statusText = "قيد المراجعة";
+        }
+
+        result.style.color = "#333";
+
+        result.innerHTML = `
+            <div class="info-card">
+                <p><strong>الاسم:</strong> ${data.full_name || "غير متوفر"}</p>
+                <p><strong>رقم الهوية:</strong> ${data.national_id || "غير متوفر"}</p>
+                <p><strong>التخصص:</strong> ${data.department || "غير متوفر"}</p>
+                <p><strong>حالة الطلب:</strong> ${statusText}</p>
+                <p><strong>تاريخ الطلب:</strong> ${data.created_at || "غير متوفر"}</p>
+            </div>
+        `;
+    })
+    .catch(error => {
+        result.style.color = "red";
+        result.innerHTML = "حدث خطأ أثناء الاستعلام";
+        console.log(error);
+    });
+}
+</script>
+
+</body>
+</html>

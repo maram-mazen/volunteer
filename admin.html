@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إدارة طلبات التطوع</title>
+
+<style>
+body{
+    font-family: Cairo, Arial, sans-serif;
+    background:#f5f5f5;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    color:#871919;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.search-box{
+    width:300px;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.logout{
+    background:#871919;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    font-size:14px;
+}
+
+th{
+    background:#871919;
+    color:white;
+    padding:10px;
+}
+
+td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
+}
+
+.accept,
+.reject,
+.delete,
+.print{
+    color:white;
+    border:none;
+    padding:6px 10px;
+    cursor:pointer;
+    border-radius:5px;
+    margin:2px;
+}
+
+.accept{ background:green; }
+.reject{ background:#b00020; }
+.delete{ background:#333; }
+.print{ background:#d4af37; color:#000; }
+
+.cv-link{
+    color:#871919;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.accepted{ color:green; font-weight:bold; }
+.rejected{ color:red; font-weight:bold; }
+.pending{ color:orange; font-weight:bold; }
+</style>
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("adminLogin") !== "true"){
+    window.location.href = "login.html";
+}
+</script>
+
+<div class="top-bar">
+    <button class="logout" onclick="logout()">تسجيل خروج</button>
+    <input 
+        type="text" 
+        id="searchInput" 
+        class="search-box" 
+        placeholder="ابحث بالاسم أو الهوية أو الجوال"
+        onkeyup="searchRequests()"
+    >
+</div>
+
+<h1>إدارة طلبات التطوع</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>رقم الهوية</th>
+            <th>الجوال</th>
+            <th>الجامعة</th>
+            <th>المعدل</th>
+            <th>العنوان</th>
+            <th>التخصص</th>
+            <th>القسم</th>
+            <th>تاريخ التقديم</th>
+            <th>السيرة الذاتية</th>
+            <th>الحالة</th>
+            <th>الإجراء</th>
+        </tr>
+    </thead>
+
+    <tbody id="requestsTable"></tbody>
+</table>
+
+<script>
+let allRequests = [];
+
+fetch("/requests")
+.then(res => res.json())
+.then(requests => {
+    allRequests = requests;
+    displayRequests(allRequests);
+});
+
+function displayRequests(requests){
+    const table = document.getElementById("requestsTable");
+    table.innerHTML = "";
+
+    requests.forEach((req,index)=>{
+        let statusText = "قيد المراجعة";
+        let statusClass = "pending";
+
+        if(req.status === "accepted"){
+            statusText = "مقبول";
+            statusClass = "accepted";
+        }
+
+        if(req.status === "rejected"){
+            statusText = "مرفوض";
+            statusClass = "rejected";
+        }
+
+        let cv = "لا يوجد ملف";
+
+        if(req.attachment){
+            cv = `<a class="cv-link" href="/uploads/${req.attachment}" target="_blank">عرض الملف</a>`;
+        }
+
+        table.innerHTML += `
+        <tr>
+            <td>${req.full_name || ""}</td>
+            <td>${req.national_id || ""}</td>
+            <td>${req.phone || ""}</td>
+            <td>${req.university || ""}</td>
+            <td>${req.gpa || ""}</td>
+            <td>${req.address || ""}</td>
+            <td>${req.specialization || ""}</td>
+            <td>${req.department || ""}</td>
+            <td>${req.created_at || ""}</td>
+            <td>${cv}</td>
+            <td class="${statusClass}">${statusText}</td>
+            <td>
+                <button class="accept" onclick="changeStatus(${index},'accepted')">قبول</button>
+                <button class="reject" onclick="changeStatus(${index},'rejected')">رفض</button>
+                <button class="delete" onclick="deleteRequest(${index})">حذف</button>
+                <button class="print" onclick="printRequest(${index})">طباعة</button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function searchRequests(){
+    const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+    const filtered = allRequests.filter(req =>
+        (req.full_name || "").toLowerCase().includes(keyword) ||
+        (req.national_id || "").toLowerCase().includes(keyword) ||
+        (req.phone || "").toLowerCase().includes(keyword)
+    );
+
+    displayRequests(filtered);
+}
+
+function changeStatus(index,status){
+    fetch("/update-status",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ index:index, status:status })
+    })
+    .then(()=> location.reload());
+}
+
+function deleteRequest(index){
+    if(!confirm("هل أنت متأكد من حذف هذا الطلب؟")){
+        return;
+    }
+
+    fetch("/delete-request",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ index:index })
+    })
+    .then(()=> location.reload());
+}
+
+function printRequest(index){
+    const req = allRequests[index];
+
+    let printWindow = window.open("", "_blank");
+
+    printWindow.document.write(`
+        <html dir="rtl">
+        <head>
+            <title>طباعة طلب التطوع</title>
+            <style>
+                body{
+                    font-family: Arial;
+                    padding:30px;
+                    direction:rtl;
+                }
+                h2{
+                    text-align:center;
+                    color:#871919;
+                }
+                table{
+                    width:100%;
+                    border-collapse:collapse;
+                    margin-top:20px;
+                }
+                td{
+                    border:1px solid #000;
+                    padding:10px;
+                }
+                .title{
+                    font-weight:bold;
+                    background:#eee;
+                    width:30%;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>طلب تطوع في بلدية المغازي</h2>
+
+            <table>
+                <tr><td class="title">الاسم</td><td>${req.full_name || ""}</td></tr>
+                <tr><td class="title">رقم الهوية</td><td>${req.national_id || ""}</td></tr>
+                <tr><td class="title">الجوال</td><td>${req.phone || ""}</td></tr>
+                <tr><td class="title">المؤهل العلمي</td><td>${req.qualification || ""}</td></tr>
+                <tr><td class="title">الجامعة</td><td>${req.university || ""}</td></tr>
+                <tr><td class="title">المعدل</td><td>${req.gpa || ""}</td></tr>
+                <tr><td class="title">العنوان</td><td>${req.address || ""}</td></tr>
+                <tr><td class="title">التخصص</td><td>${req.specialization || ""}</td></tr>
+                <tr><td class="title">القسم المراد التطوع به</td><td>${req.department || ""}</td></tr>
+                <tr><td class="title">المدة الزمنية</td><td>${req.duration || ""}</td></tr>
+                <tr><td class="title">أسباب التطوع</td><td>
+                    1- ${req.reason1 || ""}<br>
+                    2- ${req.reason2 || ""}<br>
+                    3- ${req.reason3 || ""}
+                </td></tr>
+                <tr><td class="title">المهارات والخبرات</td><td>${req.skills || ""}</td></tr>
+                <tr><td class="title">المعرفون</td><td>
+                    1- ${req.reference1 || ""}<br>
+                    2- ${req.reference2 || ""}
+                </td></tr>
+                <tr><td class="title">توقيع مقدم الطلب</td><td>${req.signature_name || ""}</td></tr>
+                <tr><td class="title">تاريخ التقديم</td><td>${req.created_at || ""}</td></tr>
+            </table>
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function logout(){
+    localStorage.removeItem("adminLogin");
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

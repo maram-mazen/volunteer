@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>طلب تطوع</title>
+</head>
+
+<body>
+
+<header class="modern-header">
+
+    <div class="header-side arabic-side">
+        <h3>دولة فلسطين</h3>
+        <p>وزارة الحكم المحلي</p>
+        <p>بلدية المغازي</p>
+    </div>
+
+    <div class="header-logo">
+        <img src="css/img/logo.jpeg" alt="شعار البلدية">
+        <h2>بلدية المغازي</h2>
+     <div class="header-actions">
+    
+    <a href="status.html">الاستعلام عن الطلب</a>
+</div>
+    </div>
+
+    <div class="header-side english-side">
+        <h3>State of Palestine</h3>
+        <p>Ministry of Local Government</p>
+        <p>Municipality of El-Maghazi</p>
+    </div>
+
+</header>
+
+
+
+<form action="/save" method="POST" enctype="multipart/form-data">
+
+<section>
+
+    <div>
+        <b>السيد/ م. محمد صبري مصلح المحترم</b><br>
+        <b>رئيس بلدية المغازي</b><br>
+        <p>تحية طيبة وبعد ،،،،</p>
+    </div>
+
+    <div class="date-box">
+        التاريخ:
+        <input type="date" name="request_date" required>
+    </div>
+
+    <p class="req">طلب تطوع في بلدية المغازي</p>
+
+    <table class="info-table">
+
+        <tr>
+            <td>الاسم</td>
+            <td><input type="text" name="full_name" required></td>
+
+            <td>المؤهل العلمي</td>
+            <td><input type="text" name="qualification" required></td>
+        </tr>
+
+        <tr>
+            <td>تاريخ الميلاد</td>
+            <td><input type="date" name="birth_date" required></td>
+
+            <td>التخصص</td>
+            <td><input type="text" name="specialization" required></td>
+        </tr>
+
+        <tr>
+            <td>رقم الهوية</td>
+            <td><input type="text" name="national_id" required></td>
+
+            <td>المعدل التراكمي</td>
+            <td><input type="text" name="gpa"></td>
+        </tr>
+
+        <tr>
+            <td>الجوال</td>
+            <td><input type="text" name="phone" required></td>
+
+            <td>اسم الجامعة</td>
+            <td><input type="text" name="university"></td>
+        </tr>
+
+        <tr>
+            <td>العنوان</td>
+            <td colspan="3">
+                <input type="text" name="address" class="wide" required>
+            </td>
+        </tr>
+
+    </table>
+
+    <table class="volunteer-table">
+
+        <tr>
+            <td class="title">القسم المراد التطوع به</td>
+            <td><input type="text" name="department" required></td>
+        </tr>
+
+        <tr>
+            <td class="title">المدة الزمنية</td>
+            <td><input type="text" name="duration" required></td>
+        </tr>
+
+        <tr>
+            <td class="title">أسباب التطوع</td>
+            <td>
+                1- <input type="text" name="reason1"><br><br>
+                2- <input type="text" name="reason2"><br><br>
+                3- <input type="text" name="reason3">
+            </td>
+        </tr>
+
+        <tr>
+            <td class="title">أهم المهارات والخبرات</td>
+            <td>
+                <textarea name="skills" rows="4"></textarea>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="title">المعرفون</td>
+            <td>
+                1- <input type="text" name="reference1"><br><br>
+                2- <input type="text" name="reference2">
+            </td>
+        </tr>
+
+    </table>
+
+</section>
+
+<footer>
+
+    <p class="agree">
+        أرجو من سيادتكم الموافقة على طلب التطوع،،،،
+    </p>
+
+    <div class="signature">
+        <label>توقيع مقدم الطلب:</label>
+        <input type="text" name="signature_name" required>
+    </div>
+
+    <br><br>
+
+    <p>
+        ملاحظة:<br>
+        - إرفاق السيرة الذاتية والشهادة الجامعية
+    </p>
+
+    <input type="file" name="attachment">
+
+    <br><br>
+
+   <div class="submit-box">
+    <button type="submit">إرسال الطلب</button>
+</div>
+
+</footer>
+
+</form>
+
+<footer class="foot">
+    <div>
+        <p>
+            محافظة الوسطى - المغازي - شارع صلاح الدين<br>
+            تليفون: 08-2551146  جوال: 0597405009
+        </p>
+    </div>
+
+    <div>
+        <p>الصفحة الإلكترونية</p>
+        <a href="https://www.facebook.com/Maghazimun" target="_blank">
+            https://www.facebook.com/Maghazimun
+        </a>
+    </div>
+
+    <div>
+        <p>
+            Middle Area - EL Maghazi - Salah Edeen St.<br>
+            Tel: 08-2551146 &nbsp;&nbsp; Jawwal: 0597-405009
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
