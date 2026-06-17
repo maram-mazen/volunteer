@@ -41,7 +41,7 @@
 
 
 
-<form action="/save" method="POST" enctype="multipart/form-data">
+<form id="volunteerForm">
 
 <section>
 
@@ -193,6 +193,11 @@
         </p>
     </div>
 </footer>
-
+<script>
+    document.getElementById("volunteerForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        alert("تم إرسال الطلب بنجاح");
+    });
+    </script>
 </body>
 </html>
