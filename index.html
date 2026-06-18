@@ -15,6 +15,7 @@
 <body>
 
 <header class="modern-header">
+
     <div class="header-side arabic-side">
         <h3>دولة فلسطين</h3>
         <p>وزارة الحكم المحلي</p>
@@ -40,8 +41,10 @@
 
 
 
-<form id="volunteerForm">
-
+<form id="volunteerForm"
+      action="/save"
+      method="POST"
+      enctype="multipart/form-data">
 <section>
 
     <div>
@@ -192,11 +195,5 @@
         </p>
     </div>
 </footer>
-<script>
-    document.getElementById("volunteerForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        alert("تم إرسال الطلب بنجاح");
-    });
-    </script>
 </body>
 </html>
