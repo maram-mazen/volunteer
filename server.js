@@ -9,6 +9,10 @@ if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
 }
 
+if (!fs.existsSync("requests.json")) {
+    fs.writeFileSync("requests.json", "[]");
+}
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/");
@@ -27,14 +31,48 @@ app.use(express.static(__dirname));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 function readRequests() {
-    if (fs.existsSync("requests.json")) {
-        return JSON.parse(fs.readFileSync("requests.json", "utf8"));
+    try {
+        if (fs.existsSync("requests.json")) {
+            return JSON.parse(fs.readFileSync("requests.json", "utf8"));
+        }
+        return [];
+    } catch (error) {
+        return [];
     }
-    return [];
 }
 
 function saveRequests(requests) {
     fs.writeFileSync("requests.json", JSON.stringify(requests, null, 2));
+}
+
+function getNationalId(item) {
+    return String(
+        item.national_id ||
+        item.id_number ||
+        item.nationalId ||
+        item.id ||
+        ""
+    ).trim();
+}
+
+function getFullName(item) {
+    return (
+        item.full_name ||
+        item.fullName ||
+        item.name ||
+        item.username ||
+        ""
+    );
+}
+
+function getDepartment(item) {
+    return (
+        item.department ||
+        item.specialization ||
+        item.major ||
+        item.specialty ||
+        ""
+    );
 }
 
 app.post("/save", upload.single("attachment"), (req, res) => {
@@ -44,7 +82,7 @@ app.post("/save", upload.single("attachment"), (req, res) => {
         ...req.body,
         attachment: req.file ? req.file.filename : null,
         status: "pending",
-        created_at: new Date().toLocaleString()
+        created_at: new Date().toLocaleString("ar-EG")
     });
 
     saveRequests(requests);
@@ -150,11 +188,11 @@ app.post("/delete-request", (req, res) => {
 app.get("/check-status/:national_id", (req, res) => {
     const requests = readRequests();
 
-    const nationalId = req.params.national_id.trim();
+    const nationalId = String(req.params.national_id).trim();
 
-    const request = requests.find(item =>
-        String(item.national_id).trim() === nationalId
-    );
+    const request = requests.find(item => {
+        return getNationalId(item) === nationalId;
+    });
 
     if (!request) {
         return res.json({
@@ -164,15 +202,17 @@ app.get("/check-status/:national_id", (req, res) => {
 
     res.json({
         found: true,
-        full_name: request.full_name || "",
-        national_id: request.national_id || "",
-        department: request.department || "",
+        full_name: getFullName(request),
+        national_id: getNationalId(request),
+        department: getDepartment(request),
         status: request.status || "pending",
         created_at: request.created_at || "",
         attachment: request.attachment || null
     });
 });
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
 });
